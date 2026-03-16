@@ -40,7 +40,7 @@ jobs:
           SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
         run: |
           ./sysdig-cli-scanner \
-            --apiurl https://us4.app.sysdig.com \
-            docker://${{ secrets.DOCKERHUB_USERNAME }}/voting-${{ matrix.service }}:latest \
+            --apiurl https://app.us4.sysdig.com \
+            pull://${{ secrets.DOCKERHUB_USERNAME }}/voting-${{ matrix.service }}:latest \
             --console-log \
             || true
