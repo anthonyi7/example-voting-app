@@ -28,13 +28,19 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/voting-${{ matrix.service }}:latest
 
-      - name: Scan with Sysdig
-        id: scan
-        uses: sysdiglabs/scan-action@v6
-        with:
-          image-tag: ${{ secrets.DOCKERHUB_USERNAME }}/voting-${{ matrix.service }}:latest
-          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: https://us4.app.sysdig.com
-          #set to true if you expect no issues with image
-          stop-on-failed-policy-eval: false
-          stop-on-processing-error: false
+      - name: Download Sysdig CLI Scanner
+        run: |
+          curl -LO "https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt"
+          SCANNER_VERSION=$(cat latest_version.txt)
+          curl -LO "https://download.sysdig.com/scanning/sysdig-cli-scanner/${SCANNER_VERSION}/linux/amd64/sysdig-cli-scanner"
+          chmod +x sysdig-cli-scanner
+
+      - name: Scan with Sysdig CLI Scanner
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
+          ./sysdig-cli-scanner \
+            --apiurl https://us4.app.sysdig.com \
+            docker://${{ secrets.DOCKERHUB_USERNAME }}/voting-${{ matrix.service }}:latest \
+            --console-log \
+            || true
