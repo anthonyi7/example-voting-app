@@ -1,6 +1,8 @@
-FROM node:20-alpine
+FROM node:20-slim
 
-RUN apk add --no-cache curl tini
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl tini && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/local/app
 
@@ -17,5 +19,5 @@ COPY . .
 ENV PORT=80
 EXPOSE 80
 
-ENTRYPOINT ["/sbin/tini", "--"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["node", "server.js"]
